@@ -8,25 +8,14 @@ on:
 
 jobs:
   test:
-    name: Typecheck + unit tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - run: bun run typecheck
-      - run: bun test src/ --coverage
-
-  e2e:
-    name: E2E (real gateway)
-    # Real-API spend — one short generation per case. Runs after the free
-    # checks pass; skipped automatically on forks (no secret).
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-      - run: bun install --frozen-lockfile
-      - run: bun test tests/
+      # Unit + e2e in one pass. The e2e suite hits the real gateway and
+      # self-skips when the key is absent (e.g. forks).
+      - run: bun test --coverage
         env:
           AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
