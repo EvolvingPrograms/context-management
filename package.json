@@ -10,7 +10,8 @@
   },
   "scripts": {
     "test": "bun test src/",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "bun --env-file=.env.local test tests/"
   },
   "peerDependencies": {
     "ai": ">=6",

@@ -61,6 +61,23 @@ describe("truncateToolResults", () => {
   })
 })
 
+describe("round trip — stub id recovers the original body", () => {
+  test("id parsed from the actual stub text hits the history-backed store", async () => {
+    const { historyOutputStore } = await import("./store")
+    const original = [result("call-doc-1", BIG), result("call-doc-2", BIG)]
+    const truncated = truncateToolResults(original, { keepLast: 1, maxChars: 100, preview: 10 })
+
+    // Read the id the MODEL would read — out of the stub text itself.
+    const stub = firstOutput(truncated[0]!)
+    const id = /call fetch_full_result with id "([^"]+)"/.exec(stub)?.[1]
+    expect(id).toBe("call-doc-1")
+
+    // The store is built from the UN-truncated history (as persisted).
+    const store = historyOutputStore(original)
+    expect(await store.get(id!)).toBe(BIG)
+  })
+})
+
 describe("isTruncationStub", () => {
   test("recognizes stubs, rejects ordinary text", () => {
     expect(isTruncationStub(truncationStub("id-1", 999, "head"))).toBe(true)
