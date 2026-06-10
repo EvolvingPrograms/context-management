@@ -69,6 +69,16 @@ describe("createContextManagement — modes", () => {
     expect(cm.systemSuffix).toContain("fetch_full_result")
   })
 
+  test("managed with a non-thinking model omits ONLY the clear_thinking edit", () => {
+    const cm = createContextManagement({
+      mode: "managed",
+      model: "anthropic/claude-3.5-sonnet",
+    })
+    const edits = (cm.providerOptions().anthropic?.contextManagement as { edits: { type: string }[] })
+      .edits
+    expect(edits.map((e) => e.type)).toEqual(["clear_tool_uses_20250919"])
+  })
+
   test("managed without a store skips truncation (no tool, no suffix)", () => {
     const cm = createContextManagement({ mode: "managed", model: "m" })
     expect(cm.tools).toEqual({})

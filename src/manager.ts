@@ -44,6 +44,7 @@ import { TRUNCATION_SYSTEM_PROMPT } from "./truncation/system"
 import { truncateToolResults, type TruncateOptions } from "./truncation/truncate"
 import type { FullOutputStore } from "./truncation/store"
 import { makeMessageMetadata } from "./usage/metadata"
+import { supportsExtendedThinking } from "./models"
 import { modeFlags, type ContextManagementMode } from "./modes"
 
 export interface ContextManagementOptions {
@@ -84,6 +85,17 @@ export interface ContextManagement {
   ): ModelMessage[]
 }
 
+/**
+ * Compose the mode's techniques into one per-request object: plug
+ * `prepareStep`, `providerOptions`, `tools`, `systemSuffix`, and
+ * `messageMetadata` into `streamText` / `toUIMessageStreamResponse`.
+ * Create ONE per request (the metadata callback accumulates the turn's
+ * billed cost).
+ *
+ * Model capability is handled internally: models without extended
+ * thinking (claude-3.x) get the `clear_thinking` edit omitted in
+ * `managed` mode — everything else still applies.
+ */
 export function createContextManagement(
   options: ContextManagementOptions,
 ): ContextManagement {
@@ -125,6 +137,7 @@ export function createContextManagement(
           JSON.stringify(
             contextEdits({
               contextWindow: options.contextWindow ?? 200_000,
+              clearThinking: supportsExtendedThinking(options.model),
               ...options.edits,
             }),
           ),

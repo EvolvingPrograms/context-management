@@ -8,6 +8,7 @@
  */
 
 export * from "./manager"
+export * from "./models"
 export * from "./modes"
 export * from "./breakpoints"
 export * from "./edits"

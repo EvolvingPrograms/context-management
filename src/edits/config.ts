@@ -31,6 +31,10 @@ export interface ContextEditOptions {
   keepToolUses?: number
   /** Newest thinking turns kept. Default: 20. */
   keepThinkingTurns?: number
+  /** Include the `clear_thinking` edit. Pass false for models without
+   * extended thinking — the edit ERRORS when thinking is disabled.
+   * Default: true. */
+  clearThinking?: boolean
 }
 
 /** Build the `anthropic.contextManagement` provider option. */
@@ -38,19 +42,19 @@ export function contextEdits(opts: ContextEditOptions): ContextManagementConfig 
   const trigger = opts.trigger ?? Math.round(opts.contextWindow * 0.18)
   const clearAtLeast = opts.clearAtLeast ?? Math.round(trigger / 3)
 
-  return {
-    edits: [
-      {
-        type: "clear_thinking_20251015",
-        keep: { type: "thinking_turns", value: opts.keepThinkingTurns ?? 20 },
-      },
-      {
-        type: "clear_tool_uses_20250919",
-        trigger: { type: "input_tokens", value: trigger },
-        keep: { type: "tool_uses", value: opts.keepToolUses ?? 20 },
-        clearAtLeast: { type: "input_tokens", value: clearAtLeast },
-        clearToolInputs: false,
-      },
-    ],
+  const edits: ContextManagementConfig["edits"] = []
+  if (opts.clearThinking !== false) {
+    edits.push({
+      type: "clear_thinking_20251015",
+      keep: { type: "thinking_turns", value: opts.keepThinkingTurns ?? 20 },
+    })
   }
+  edits.push({
+    type: "clear_tool_uses_20250919",
+    trigger: { type: "input_tokens", value: trigger },
+    keep: { type: "tool_uses", value: opts.keepToolUses ?? 20 },
+    clearAtLeast: { type: "input_tokens", value: clearAtLeast },
+    clearToolInputs: false,
+  })
+  return { edits }
 }

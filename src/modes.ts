@@ -11,6 +11,13 @@
  *                 with recovery (the strategy-7 technique stack)
  */
 
+/**
+ * Technique level, strictly increasing:
+ * `off` (nothing) → `auto` (gateway auto caching) → `pinned` (+ per-step
+ * tail breakpoint, -15% on tool loops, safe everywhere) → `managed`
+ * (+ trailing chain, server context edits, mirror-trim, tool-result
+ * truncation with recovery).
+ */
 export type ContextManagementMode = "off" | "auto" | "pinned" | "managed"
 
 export interface ModeFlags {
@@ -26,6 +33,7 @@ export interface ModeFlags {
   truncation: boolean
 }
 
+/** Resolve a mode to its technique flags (see the ladder above). */
 export function modeFlags(mode: ContextManagementMode): ModeFlags {
   switch (mode) {
     case "off":

@@ -29,6 +29,12 @@ describe("contextEdits", () => {
     })
   })
 
+  test("clearThinking: false omits the clear_thinking edit (non-thinking models)", () => {
+    const cfg = contextEdits({ contextWindow: 200_000, clearThinking: false })
+    expect(cfg.edits).toHaveLength(1)
+    expect(cfg.edits?.[0]).toMatchObject({ type: "clear_tool_uses_20250919" })
+  })
+
   test("explicit overrides win", () => {
     const cfg = contextEdits({
       contextWindow: 200_000,
