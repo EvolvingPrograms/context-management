@@ -14,6 +14,10 @@
  */
 
 import { describe, expect, test } from "bun:test"
+import { mkdtempSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
+import { $ } from "bun"
 import { generateText, stepCountIs, tool, type ModelMessage } from "ai"
 import { z } from "zod"
 
@@ -109,6 +113,87 @@ describe.skipIf(!HAS_KEY)("truncated tool-result recovery (real agent)", () => {
 
       // (b) The recovered body let it answer the question.
       expect(result.text).toContain(SECRET)
+    },
+    120_000,
+  )
+
+  test(
+    "agent recovers a value buried in a long truncated bash stdout (grep/tail/fetch)",
+    async () => {
+      // Recreate the prior turn's working dir for real: the loop's output
+      // file exists on disk, so grep/tail are legitimate recovery paths
+      // alongside fetch_full_result.
+      const dir = mkdtempSync(join(tmpdir(), "cm-recovery-"))
+      const COMMAND = `seq 1 1000 | awk '{print "line "$1": "$1*7}' | tee out.txt`
+      const stdout = await $`sh -c ${COMMAND}`.cwd(dir).text()
+      expect(stdout).toContain("line 837: 5859")
+
+      const bash = tool({
+        description: "Run a bash command in the working directory.",
+        inputSchema: z.object({ command: z.string() }),
+        execute: async ({ command }) =>
+          (await $`sh -c ${command}`.cwd(dir).nothrow().text()).slice(0, 50_000),
+      })
+
+      const priorTurn: ModelMessage[] = [
+        { role: "user", content: "Generate lines 'line i: i*7' for i = 1..1000 into out.txt, showing the output." },
+        {
+          role: "assistant",
+          content: [
+            { type: "tool-call", toolCallId: "call-loop", toolName: "bash", input: { command: COMMAND } },
+          ],
+        },
+        {
+          role: "tool",
+          content: [
+            { type: "tool-result", toolCallId: "call-loop", toolName: "bash", output: { type: "text", value: stdout } },
+          ],
+        },
+        // A newer small result so keepLast: 1 protects THIS, not the loop output.
+        {
+          role: "assistant",
+          content: [
+            { type: "tool-call", toolCallId: "call-check", toolName: "bash", input: { command: "wc -l < out.txt" } },
+          ],
+        },
+        {
+          role: "tool",
+          content: [
+            { type: "tool-result", toolCallId: "call-check", toolName: "bash", output: { type: "text", value: "1000" } },
+          ],
+        },
+        { role: "assistant", content: "Done — wrote 1000 lines to out.txt." },
+      ]
+
+      const question: ModelMessage = {
+        role: "user",
+        content: "What value was printed on line 837 of that output? Answer with just the number.",
+      }
+      const messages = [...priorTurn, question]
+
+      const cm = createContextManagement({
+        mode: "managed",
+        model: MODEL,
+        modelMessages: messages,
+        truncation: { keepLast: 1, maxChars: 2000, preview: 120 },
+        edits: false,
+      })
+
+      const result = await generateText({
+        model: MODEL,
+        system: "You are a terse assistant with a bash tool." + cm.systemSuffix,
+        messages,
+        tools: { bash, ...cm.tools },
+        prepareStep: cm.prepareStep,
+        providerOptions: cm.providerOptions(),
+        stopWhen: stepCountIs(5),
+      })
+
+      // It recovered rather than hallucinating: at least one tool call
+      // (grep/tail/re-run via bash, or fetch_full_result) and the right value.
+      const calls = result.steps.flatMap((s) => s.toolCalls)
+      expect(calls.length).toBeGreaterThan(0)
+      expect(result.text).toContain("5859")
     },
     120_000,
   )
