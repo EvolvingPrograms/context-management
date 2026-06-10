@@ -20,6 +20,35 @@
  */
 export type ContextManagementMode = "off" | "auto" | "pinned" | "managed"
 
+export const CONTEXT_MANAGEMENT_MODES: readonly ContextManagementMode[] = [
+  "off",
+  "auto",
+  "pinned",
+  "managed",
+]
+
+/** Env var that overrides the configured mode at runtime (experiments,
+ * incident rollback) — read by `resolveMode` / `createContextManagement`. */
+export const MODE_ENV_VAR = "CONTEXT_MANAGEMENT_MODE"
+
+export function isContextManagementMode(
+  value: unknown,
+): value is ContextManagementMode {
+  return CONTEXT_MANAGEMENT_MODES.includes(value as ContextManagementMode)
+}
+
+/**
+ * The effective mode: the `CONTEXT_MANAGEMENT_MODE` env var when set to a
+ * valid mode, else the configured default. `createContextManagement`
+ * calls this on its `mode` option, so apps get the override for free.
+ */
+export function resolveMode(
+  configured: ContextManagementMode = "pinned",
+): ContextManagementMode {
+  const env = globalThis.process?.env?.[MODE_ENV_VAR]
+  return isContextManagementMode(env) ? env : configured
+}
+
 export interface ModeFlags {
   /** Request gateway server-side auto caching. */
   gatewayAuto: boolean

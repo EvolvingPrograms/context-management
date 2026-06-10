@@ -45,10 +45,12 @@ import { truncateToolResults, type TruncateOptions } from "./truncation/truncate
 import type { FullOutputStore } from "./truncation/store"
 import { makeMessageMetadata } from "./usage/metadata"
 import { supportsExtendedThinking } from "./models"
-import { modeFlags, type ContextManagementMode } from "./modes"
+import { modeFlags, resolveMode, type ContextManagementMode } from "./modes"
 
 export interface ContextManagementOptions {
-  /** Technique level. Default: "pinned" (safe everywhere, -15% on tool loops). */
+  /** Technique level. Default: "pinned" (safe everywhere, -15% on tool
+   * loops). The `CONTEXT_MANAGEMENT_MODE` env var, when set to a valid
+   * mode, overrides this at runtime. */
   mode?: ContextManagementMode
   /** Model id, recorded into each message's usage metadata. */
   model: string
@@ -99,7 +101,7 @@ export interface ContextManagement {
 export function createContextManagement(
   options: ContextManagementOptions,
 ): ContextManagement {
-  const mode = options.mode ?? "pinned"
+  const mode = resolveMode(options.mode)
   const flags = modeFlags(mode)
 
   const truncation =
