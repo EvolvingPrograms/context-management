@@ -1,0 +1,33 @@
+{
+  "name": "context-management",
+  "version": "0.1.0",
+  "description": "Prompt-cache + context-window management for AI SDK apps: breakpoint placement, Anthropic context edits, tool-result truncation with recovery, and usage/cost accounting.",
+  "type": "module",
+  "private": true,
+  "module": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "bun test src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "ai": ">=6",
+    "@ai-sdk/provider-utils": ">=4",
+    "zod": ">=3"
+  },
+  "peerDependenciesMeta": {
+    "zod": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@ai-sdk/anthropic": "latest",
+    "@ai-sdk/provider-utils": "latest",
+    "@types/bun": "latest",
+    "ai": "latest",
+    "typescript": "^5",
+    "zod": "latest"
+  }
+}
