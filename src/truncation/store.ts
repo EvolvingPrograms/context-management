@@ -21,7 +21,11 @@ export interface FullOutputStore {
 
 /** Simple in-memory store; also usable as a per-request cache. */
 export class MemoryFullOutputStore implements FullOutputStore {
-  private readonly outputs = new Map<string, string>()
+  private readonly outputs: Map<string, string>
+
+  constructor() {
+    this.outputs = new Map()
+  }
 
   set(id: string, body: string): void {
     this.outputs.set(id, body)

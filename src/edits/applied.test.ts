@@ -52,5 +52,14 @@ describe("describeEdit", () => {
     expect(describeEdit(CLEAR_THINKING)).toBe(
       "cleared 2 thinking turn(s); freed 800 tokens",
     )
+    expect(describeEdit({ type: "compact_20260112" } as AppliedEdit)).toBe(
+      "compaction applied",
+    )
+  })
+
+  test("unknown future edit types fall back to a generic line", () => {
+    expect(describeEdit({ type: "frobnicate_20991231" } as never)).toBe(
+      "edit applied: frobnicate_20991231",
+    )
   })
 })

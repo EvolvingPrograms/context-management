@@ -15,7 +15,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - run: bun run typecheck
-      - run: bun test src/
+      - run: bun test src/ --coverage
 
   e2e:
     name: E2E (real gateway)

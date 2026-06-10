@@ -172,3 +172,32 @@ describe("withEphemeralCacheControl", () => {
     })
   })
 })
+
+describe("edge contents", () => {
+  test("empty content arrays pass through untouched", () => {
+    const user = withEphemeralCacheControl({ role: "user", content: [] })
+    expect(user.content).toEqual([])
+    const assistant = withEphemeralCacheControl({ role: "assistant", content: [] })
+    expect(assistant.content).toEqual([])
+    const tool = withEphemeralCacheControl({ role: "tool", content: [] })
+    expect(tool.content).toEqual([])
+  })
+
+  test("approval-part tails are left untagged (no providerOptions field)", () => {
+    const assistant = withEphemeralCacheControl({
+      role: "assistant",
+      content: [
+        { type: "tool-approval-request", approvalId: "ap-1", toolCallId: "tc-1" },
+      ],
+    } as never)
+    expect(JSON.stringify(assistant)).not.toContain("cacheControl")
+
+    const tool = withEphemeralCacheControl({
+      role: "tool",
+      content: [
+        { type: "tool-approval-response", approvalId: "ap-1", approved: true },
+      ],
+    } as never)
+    expect(JSON.stringify(tool)).not.toContain("cacheControl")
+  })
+})
