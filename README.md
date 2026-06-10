@@ -74,13 +74,13 @@ Or compose everything with one call — modes `off | auto | pinned |
 managed` mirror the gateway-caching strategy ladder:
 
 ```ts
-import { createContextManagement, historyOutputStore } from "@evolvingprograms/context-management"
+import { createContextManagement } from "@evolvingprograms/context-management"
 
 const cm = createContextManagement({
   mode: "managed",
   model: modelId,
   contextWindow: 200_000,
-  store: historyOutputStore(modelMessages),
+  modelMessages, // backs the fetch_full_result recovery tool automatically
 })
 
 const result = streamText({

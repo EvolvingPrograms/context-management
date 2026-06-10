@@ -51,6 +51,7 @@ export interface SessionUsage {
   costUsd: number
 }
 
+/** All-zeroes `Usage` — fold identity for `addUsage`. */
 export const EMPTY_USAGE: Usage = {
   inputTokens: 0,
   noCacheTokens: 0,

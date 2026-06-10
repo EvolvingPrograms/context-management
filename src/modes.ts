@@ -20,6 +20,7 @@
  */
 export type ContextManagementMode = "off" | "auto" | "pinned" | "managed"
 
+/** All valid modes, in ladder order. */
 export const CONTEXT_MANAGEMENT_MODES: readonly ContextManagementMode[] = [
   "off",
   "auto",
@@ -31,6 +32,7 @@ export const CONTEXT_MANAGEMENT_MODES: readonly ContextManagementMode[] = [
  * incident rollback) — read by `resolveMode` / `createContextManagement`. */
 export const MODE_ENV_VAR = "CONTEXT_MANAGEMENT_MODE"
 
+/** Type guard for `ContextManagementMode` (validates env/user input). */
 export function isContextManagementMode(
   value: unknown,
 ): value is ContextManagementMode {
@@ -49,6 +51,7 @@ export function resolveMode(
   return isContextManagementMode(env) ? env : configured
 }
 
+/** Which techniques a mode turns on — resolved by `modeFlags`. */
 export interface ModeFlags {
   /** Request gateway server-side auto caching. */
   gatewayAuto: boolean

@@ -11,8 +11,12 @@ import { z } from "zod"
 
 import type { FullOutputStore } from "./store"
 
+/** The recovery tool's name — the key to spread into the app's tool set. */
 export const FETCH_FULL_RESULT_TOOL_NAME = "fetch_full_result"
 
+/** Build the `fetch_full_result` tool: returns the full stored body of a
+ * truncated tool result by the `toolCallId` named in its stub. Spread into
+ * the app's tools alongside `truncateToolResults` + the system snippet. */
 export function createFetchFullResultTool(args: { store: FullOutputStore }) {
   return tool({
     description:

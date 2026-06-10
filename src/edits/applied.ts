@@ -7,6 +7,8 @@
 
 import type { AnthropicMessageMetadata } from "@ai-sdk/anthropic"
 
+/** One context-editing operation Anthropic applied to a request (the
+ * provider's strongly-typed `appliedEdits` record). */
 export type AppliedEdit = NonNullable<
   AnthropicMessageMetadata["contextManagement"]
 >["appliedEdits"][number]

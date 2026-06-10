@@ -16,6 +16,7 @@ import type { ModelMessage } from "ai"
 
 import { toolOutputText } from "./serialize"
 
+/** Thresholds for `truncateToolResults`. */
 export interface TruncateOptions {
   /** Newest tool results always kept verbatim. Default: 4. */
   keepLast?: number

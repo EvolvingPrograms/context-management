@@ -11,6 +11,9 @@ import type { ModelMessage } from "ai"
 
 import { toolOutputText } from "./serialize"
 
+/** Backing for the `fetch_full_result` recovery tool: full (pre-truncation)
+ * tool outputs keyed by `toolCallId`. Apps with persisted chat history get
+ * one free via `historyOutputStore`. */
 export interface FullOutputStore {
   /** The full output for a tool call id, or null when unknown. */
   get(id: string): Promise<string | null> | string | null

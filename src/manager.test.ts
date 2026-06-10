@@ -85,6 +85,24 @@ describe("createContextManagement — modes", () => {
     expect(cm.systemSuffix).toBe("")
   })
 
+  test("managed with `modelMessages` derives the recovery store automatically", async () => {
+    const history: ModelMessage[] = [
+      {
+        role: "tool",
+        content: [
+          { type: "tool-result", toolCallId: "x", toolName: "t", output: { type: "text", value: "full body" } },
+        ],
+      },
+    ]
+    const cm = createContextManagement({ mode: "managed", model: "m", modelMessages: history })
+    const fetchTool = cm.tools[FETCH_FULL_RESULT_TOOL_NAME]
+    expect(fetchTool).toBeDefined()
+    const execute = fetchTool?.execute
+    if (!execute) throw new Error("tool has no execute")
+    expect(await execute({ id: "x" }, { toolCallId: "tc", messages: [] })).toBe("full body")
+    expect(cm.systemSuffix).toContain("fetch_full_result")
+  })
+
   test("caller's explicit gateway options win over the preset", () => {
     const cm = createContextManagement({ mode: "pinned", model: "m" })
     const po = cm.providerOptions({ gateway: { caching: "manual" } })

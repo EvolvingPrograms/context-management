@@ -22,6 +22,10 @@ import type { UsageMessageMetadata } from "../usage/types"
 import { clearedToolUses, extractAppliedEdits } from "./applied"
 import { dropOldestToolUses } from "./trim"
 
+/** Mirror a turn's server-side `clear_tool_uses` edits onto an in-memory
+ * history: count the clears in each step's `providerMetadata` and drop the
+ * same number of oldest tool pairs, so the next outgoing prefix matches
+ * the server's rewritten cache. */
 export function mirrorTrim(
   history: readonly ModelMessage[],
   stepProviderMetadata: readonly unknown[],

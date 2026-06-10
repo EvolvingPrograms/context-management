@@ -17,6 +17,8 @@
 import type { AnthropicLanguageModelOptions } from "@ai-sdk/anthropic"
 import type { ProviderOptions } from "@ai-sdk/provider-utils"
 
+/** The `anthropic.contextManagement` provider-option shape (built by
+ * `contextEdits`). */
 export type ContextManagementConfig = NonNullable<
   AnthropicLanguageModelOptions["contextManagement"]
 >
@@ -35,6 +37,8 @@ export function anthropicOptions(
   return providerOptions?.anthropic as AnthropicLanguageModelOptions | undefined
 }
 
+/** Sizing for `contextEdits` — only `contextWindow` is required; the
+ * defaults implement the cache-friendly tuning (see module doc). */
 export interface ContextEditOptions {
   /** Model context window in tokens (e.g. 200_000, 1_000_000). */
   contextWindow: number

@@ -17,6 +17,8 @@ import type { ModelMessage } from "ai"
 
 import { withEphemeralCacheControl } from "./ephemeral"
 
+/** Tag the last `n` messages with ephemeral `cache_control` — the rolling
+ * breakpoint chain (see module doc for the 4-marker budget math). */
 export function tagTrailing(
   messages: readonly ModelMessage[],
   n: number,

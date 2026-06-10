@@ -45,6 +45,9 @@ const ANTHROPIC_EPHEMERAL = {
 // Public entry point
 // ---------------------------------------------------------------------------
 
+/** Clone a message with `cache_control: { type: "ephemeral" }` applied at
+ * the right level per role: message-level for `system`, last content part
+ * for `user` / `assistant` / `tool`. Never mutates the input. */
 export function withEphemeralCacheControl(msg: ModelMessage): ModelMessage {
   switch (msg.role) {
     case "system":

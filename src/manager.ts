@@ -7,7 +7,7 @@
  *       mode: "managed",
  *       model: modelId,
  *       contextWindow: 200_000,
- *       store: historyOutputStore(modelMessages),
+ *       modelMessages, // backs fetch_full_result automatically
  *     })
  *
  *     const result = streamText({
@@ -42,11 +42,13 @@ import {
 } from "./truncation/fetch-tool"
 import { TRUNCATION_SYSTEM_PROMPT } from "./truncation/system"
 import { truncateToolResults, type TruncateOptions } from "./truncation/truncate"
-import type { FullOutputStore } from "./truncation/store"
+import { historyOutputStore, type FullOutputStore } from "./truncation/store"
 import { makeMessageMetadata } from "./usage/metadata"
 import { supportsExtendedThinking } from "./models"
 import { modeFlags, resolveMode, type ContextManagementMode } from "./modes"
 
+/** Configuration for `createContextManagement` — pick a mode, name the
+ * model, and (for `managed`) provide the recovery store + window size. */
 export interface ContextManagementOptions {
   /** Technique level. Default: "pinned" (safe everywhere, -15% on tool
    * loops). The `CONTEXT_MANAGEMENT_MODE` env var, when set to a valid
@@ -57,8 +59,12 @@ export interface ContextManagementOptions {
   /** Model context window in tokens; sizes the server-side edits.
    * Default: 200_000. */
   contextWindow?: number
-  /** Backing for the `fetch_full_result` recovery tool. Required for
-   * truncation to activate (managed mode without a store skips it). */
+  /** The request's UN-truncated model messages. In managed mode they back
+   * the `fetch_full_result` recovery tool automatically (via
+   * `historyOutputStore`) — no separate storage needed. */
+  modelMessages?: readonly ModelMessage[]
+  /** Custom backing for the recovery tool (a DB, a cache). Overrides the
+   * `modelMessages`-derived store. Without either, truncation is skipped. */
   store?: FullOutputStore
   /** Override truncation thresholds, or `false` to disable in managed mode. */
   truncation?: TruncateOptions | false
@@ -66,6 +72,17 @@ export interface ContextManagementOptions {
   edits?: Partial<ContextEditOptions> | false
 }
 
+/**
+ * One request's composed context management. Plug each piece into the
+ * AI SDK call:
+ *
+ *     streamText({
+ *       prepareStep: cm.prepareStep,
+ *       providerOptions: cm.providerOptions(base),
+ *       tools: { ...appTools, ...cm.tools },
+ *       system: SYSTEM + cm.systemSuffix,
+ *     }).toUIMessageStreamResponse({ messageMetadata: cm.messageMetadata })
+ */
 export interface ContextManagement {
   mode: ContextManagementMode
   /** `prepareStep` for streamText/generateText: truncation + breakpoints. */
@@ -104,8 +121,12 @@ export function createContextManagement(
   const mode = resolveMode(options.mode)
   const flags = modeFlags(mode)
 
+  const store =
+    options.store ??
+    (options.modelMessages ? historyOutputStore(options.modelMessages) : undefined)
+
   const truncation =
-    flags.truncation && options.truncation !== false && options.store
+    flags.truncation && options.truncation !== false && store
       ? (options.truncation ?? {})
       : false
 
@@ -150,8 +171,8 @@ export function createContextManagement(
   }
 
   const tools: Record<string, Tool> =
-    truncation !== false && options.store
-      ? { [FETCH_FULL_RESULT_TOOL_NAME]: createFetchFullResultTool({ store: options.store }) }
+    truncation !== false && store
+      ? { [FETCH_FULL_RESULT_TOOL_NAME]: createFetchFullResultTool({ store }) }
       : {}
 
   return {

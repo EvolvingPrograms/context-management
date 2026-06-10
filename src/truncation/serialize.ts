@@ -6,8 +6,11 @@
 
 import type { ToolResultPart } from "ai"
 
+/** The AI SDK's tool-result output union (text / json / content / errors). */
 export type ToolOutput = ToolResultPart["output"]
 
+/** Render any `ToolResultOutput` variant as plain text — the shape stored,
+ * measured against truncation thresholds, and returned by the recovery tool. */
 export function toolOutputText(output: ToolOutput): string {
   switch (output.type) {
     case "text":

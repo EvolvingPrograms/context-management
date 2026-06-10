@@ -4,6 +4,9 @@
  * enabled — it's constant, so the cached prefix stays stable.
  */
 
+/** Static system-prompt snippet telling the model how truncation works and
+ * that `fetch_full_result` recovers full bodies. Append once (constant, so
+ * the cached system prefix stays stable). */
 export const TRUNCATION_SYSTEM_PROMPT = `
 # Truncated tool results
 To conserve context, the bodies of older large tool results may be replaced
