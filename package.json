@@ -23,7 +23,6 @@
     }
   },
   "devDependencies": {
-    "@ai-sdk/anthropic": "latest",
     "@ai-sdk/provider-utils": "latest",
     "@types/bun": "latest",
     "ai": "latest",
@@ -34,5 +33,8 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/EvolvingPrograms/context-management"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^3"
   }
 }

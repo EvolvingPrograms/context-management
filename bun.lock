@@ -4,8 +4,10 @@
   "workspaces": {
     "": {
       "name": "context-management",
+      "dependencies": {
+        "@ai-sdk/anthropic": "^3",
+      },
       "devDependencies": {
-        "@ai-sdk/anthropic": "latest",
         "@ai-sdk/provider-utils": "latest",
         "@types/bun": "latest",
         "ai": "latest",
