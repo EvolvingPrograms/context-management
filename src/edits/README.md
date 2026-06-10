@@ -32,6 +32,9 @@ pre-edit prefix, mismatches the rewritten cache, and pays a full write.
   oldest n tool-call/result pairs, preserving assistant narration.
 - [`mirror-trim.ts`](./mirror-trim.ts) — `mirrorTrim(history,
   stepProviderMetadata)`: count server clears, drop the same count locally.
+  `mirrorPersistedClears(uiMessages, modelMessages)`: the persisted-history
+  variant — fold the per-turn clear counts `makeMessageMetadata` recorded
+  and trim the rebuilt prefix at load time.
 
 ## Tests
 

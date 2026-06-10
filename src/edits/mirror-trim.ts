@@ -15,8 +15,10 @@
  *     const trimmed = mirrorTrim(history, steps.map((s) => s.providerMetadata))
  */
 
-import type { ModelMessage } from "ai"
+import type { ModelMessage, UIMessage } from "ai"
 
+import { totalClearedToolUses } from "../usage/aggregate"
+import type { UsageMessageMetadata } from "../usage/types"
 import { clearedToolUses, extractAppliedEdits } from "./applied"
 import { dropOldestToolUses } from "./trim"
 
@@ -32,4 +34,28 @@ export function mirrorTrim(
     return [...history]
   }
   return dropOldestToolUses(history, cleared)
+}
+
+/**
+ * The persisted-history variant: apps that save FULL UIMessages and
+ * rebuild the model prefix per request mirror the server's PAST clears at
+ * load time instead. `makeMessageMetadata` records each turn's cleared
+ * count on the message; this folds those counts and drops the same number
+ * of oldest tool uses from the rebuilt prefix, so the outgoing request
+ * matches the server's rewritten cache.
+ *
+ *     const modelMessages = mirrorPersistedClears(
+ *       uiMessages,
+ *       await convertToModelMessages(uiMessages),
+ *     )
+ */
+export function mirrorPersistedClears(
+  uiMessages: readonly UIMessage<UsageMessageMetadata>[],
+  modelMessages: ModelMessage[],
+): ModelMessage[] {
+  const cleared = totalClearedToolUses(uiMessages)
+  if (cleared === 0) {
+    return modelMessages
+  }
+  return dropOldestToolUses(modelMessages, cleared)
 }

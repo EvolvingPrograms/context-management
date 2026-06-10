@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test"
 
 import type { ModelMessage } from "ai"
 
-import { mirrorTrim } from "./mirror-trim"
+import { mirrorPersistedClears, mirrorTrim } from "./mirror-trim"
 
 const toolTurn = (id: string): ModelMessage[] => [
   {
@@ -58,5 +58,23 @@ describe("mirrorTrim", () => {
       { role: "user", content: "q" },
       { role: "assistant", content: "done" },
     ])
+  })
+})
+
+describe("mirrorPersistedClears", () => {
+  const ui = (clearedToolUses?: number) =>
+    ({ id: "m", role: "assistant", parts: [], metadata: clearedToolUses ? { clearedToolUses } : undefined }) as never
+
+  test("drops the total recorded across persisted turns", () => {
+    const out = mirrorPersistedClears([ui(), ui(1)], HISTORY)
+    expect(out).toEqual([
+      { role: "user", content: "q" },
+      ...toolTurn("b"),
+      { role: "assistant", content: "done" },
+    ])
+  })
+
+  test("no recorded clears → prefix passes through untouched", () => {
+    expect(mirrorPersistedClears([ui()], HISTORY)).toBe(HISTORY)
   })
 })
