@@ -1,9 +1,8 @@
 {
-  "name": "context-management",
+  "name": "@evolvingprograms/context-management",
   "version": "0.1.0",
   "description": "Prompt-cache + context-window management for AI SDK apps: breakpoint placement, Anthropic context edits, tool-result truncation with recovery, and usage/cost accounting.",
   "type": "module",
-  "private": true,
   "module": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts"
@@ -30,5 +29,10 @@
     "ai": "latest",
     "typescript": "^5",
     "zod": "latest"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EvolvingPrograms/context-management"
   }
 }

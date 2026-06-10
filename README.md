@@ -1,8 +1,7 @@
 # context-management
 
 Prompt-cache + context-window management for [AI SDK](https://ai-sdk.dev)
-apps. Extracted from the
-[gateway-caching](../gateway-caching) experiments, where the combined
+apps. Extracted from a set of gateway-caching experiments, where the combined
 techniques cut a 20-turn Opus conversation's cost by **82%** vs. gateway
 `caching: "auto"` alone.
 
@@ -29,12 +28,16 @@ What it does:
 
 ## Install
 
-Local, from disk (publishing comes later):
+```sh
+bun add github:EvolvingPrograms/context-management
+```
+
+Or locally from disk during development:
 
 ```jsonc
 // package.json
 "dependencies": {
-  "context-management": "file:../context-management"
+  "@evolvingprograms/context-management": "file:../context-management"
 }
 ```
 
@@ -49,7 +52,7 @@ import {
   mirrorTrim,
   makeMessageMetadata,
   sessionUsage,
-} from "context-management"
+} from "@evolvingprograms/context-management"
 
 const result = streamText({
   model,
@@ -71,7 +74,7 @@ Or compose everything with one call — modes `off | auto | pinned |
 managed` mirror the gateway-caching strategy ladder:
 
 ```ts
-import { createContextManagement, historyOutputStore } from "context-management"
+import { createContextManagement, historyOutputStore } from "@evolvingprograms/context-management"
 
 const cm = createContextManagement({
   mode: "managed",
