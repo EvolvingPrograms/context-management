@@ -3,6 +3,7 @@ import { describe, expect, test } from "bun:test"
 import type { ModelMessage } from "ai"
 
 import { countBreakpoints } from "./breakpoints/count"
+import { anthropicOptions } from "./edits/config"
 import { createContextManagement } from "./manager"
 import { MemoryFullOutputStore } from "./truncation/store"
 import { FETCH_FULL_RESULT_TOOL_NAME } from "./truncation/fetch-tool"
@@ -74,9 +75,8 @@ describe("createContextManagement — modes", () => {
       mode: "managed",
       model: "anthropic/claude-3.5-sonnet",
     })
-    const edits = (cm.providerOptions().anthropic?.contextManagement as { edits: { type: string }[] })
-      .edits
-    expect(edits.map((e) => e.type)).toEqual(["clear_tool_uses_20250919"])
+    const edits = anthropicOptions(cm.providerOptions())?.contextManagement?.edits
+    expect(edits?.map((e) => e.type)).toEqual(["clear_tool_uses_20250919"])
   })
 
   test("managed without a store skips truncation (no tool, no suffix)", () => {

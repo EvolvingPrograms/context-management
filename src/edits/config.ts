@@ -15,10 +15,25 @@
  */
 
 import type { AnthropicLanguageModelOptions } from "@ai-sdk/anthropic"
+import type { ProviderOptions } from "@ai-sdk/provider-utils"
 
 export type ContextManagementConfig = NonNullable<
   AnthropicLanguageModelOptions["contextManagement"]
 >
+
+/**
+ * Read the `anthropic` block of a `ProviderOptions` record, typed as
+ * `AnthropicLanguageModelOptions`. The AI SDK stores provider options as
+ * `Record<string, JSONObject>`, so this is the one named cast — use it
+ * instead of casting at call sites:
+ *
+ *     anthropicOptions(cm.providerOptions())?.contextManagement
+ */
+export function anthropicOptions(
+  providerOptions: ProviderOptions | undefined,
+): AnthropicLanguageModelOptions | undefined {
+  return providerOptions?.anthropic as AnthropicLanguageModelOptions | undefined
+}
 
 export interface ContextEditOptions {
   /** Model context window in tokens (e.g. 200_000, 1_000_000). */
